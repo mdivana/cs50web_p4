@@ -7,7 +7,6 @@
 {% block content %}
     <article class="media content-section" style="background-color: #00FFF5; border-radius: 25px;">
         <div class="article-metadata" style="border-bottom: none;">
-            <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
             <a class="mr-2 author_title" href="{% url 'profile' %}">{{ object.author }}</a>
             <small class="text-muted">{{ object.date_posted|date:"d F, Y" }}</small>
             {% if object.author == user %}
