@@ -1,5 +1,17 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    TODO
+    {% for post in posts %}
+        <article class="media content-section" style="background-color: #00FFF5; border-radius: 25px;">
+                <div class="article-metadata" style="border-bottom: none;">
+                    <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+                    <a class="mr-2 author_title" href="{% url 'profile' %}">{{ post.author }}</a>
+                    <small class="text-muted">{{ post.date_posted|date:"d F, Y" }}</small>
+                    <div>
+                        <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
+                        <p class="article-content">{{ post.content }}</p>
+                    </div>
+                </div>
+        </article>
+    {% endfor %}
 {% endblock %}
