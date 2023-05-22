@@ -1,9 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .models import Post, User
 
@@ -66,24 +67,60 @@ def register(request):
 
 # Added class-based views to see feed
 # Might have to make function-based since class-based views won't update data without refresh
-class PostListView(ListView):
-    model = Post
-    context_object_name = 'posts'
-    ordering = ['-date_posted']
+def post_list(request):
+    posts = Post.objects.order_by('-date_posted')
+    context = {
+        'posts': posts,
+    }
+    return render(request, 'network/post_list.html', context)
 
 
-class UserPostListView(LoginRequiredMixin, ListView):
-    model = Post
-    template_name = 'network/post_list.html'
-    context_object_name = 'posts'
-    ordering = ['-date_posted']
-    
-    def get_queryset(self):
-        return super().get_queryset().filter(author=self.request.user)
+@login_required
+def user_post_list(request):
+    posts = Post.objects.filter(author=request.user).order_by('-date_posted')
+    context = {
+        'posts': posts,
+    }
+    return render(request, 'network/post_list.html', context)
 
 
-class PostDetailView(DetailView):
-    model = Post
+def post_detail(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'like':
+            if request.user not in post.likes.all():
+                post.likes.add(request.user)
+        elif action == 'unlike':
+            if request.user in post.likes.all():
+                post.likes.remove(request.user)
+
+        return redirect('post-detail', pk=pk)
+
+    context = {
+        'post': post,
+    }
+    return render(request, 'network/post_detail.html', context)
+
+
+def like_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+
+    if request.user not in post.likes.all():
+        post.likes.add(request.user)
+
+    return redirect('post-detail', pk=pk)
+
+
+def unlike_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+
+    return redirect('post-detail', pk=pk)
     
 
 class PostCreateView(LoginRequiredMixin, CreateView):

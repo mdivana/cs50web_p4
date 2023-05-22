@@ -9,6 +9,7 @@
                         <h4 class="mr-2 author_title">Post by: {{ post.author }}</h4>
                         <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
                         <p class="article-content">{{ post.content }}</p>
+                        <p>Likes: {{ post.likecount }}</p>
                     </div>
                 </div>
         </article>

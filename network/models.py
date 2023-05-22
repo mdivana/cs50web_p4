@@ -12,15 +12,22 @@ class Post(models.Model):
     title = models.CharField(max_length=70)
     content = models.TextField()
     date_posted = models.DateTimeField(auto_now_add=True)
-    likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
+    likes = models.ManyToManyField(
+        User,
+        through='Like',
+        related_name='liked_posts'
+    )
 
     def likecount(self):
-        post = Post.objects.get(self.id)
-        likes = post.likes.all()
-        return likes
-
+        return self.likes.count()
+    
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
         return reverse('post-detail', kwargs={'pk': self.pk})
+    
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    count = models.IntegerField(default=0)
