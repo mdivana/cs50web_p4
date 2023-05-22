@@ -5,8 +5,8 @@
     Post Form
 {% endblock %}
 
-{% block content %}
-    <div class="content-section" style="background-color: #00FFF5; border-radius: 25px;">
+{% block body %}
+    <div class="content-section" style="background-color: lightgray; border-radius: 20px; padding: 10px; margin: 10px;">
         <form method="POST">
             {% csrf_token %}
             <fieldset class="form-group">
@@ -14,8 +14,8 @@
                 {{ form|crispy }}
             </fieldset>
             <div class="form-group">
-                <button class="btn btn-outline-info" style="margin-top: 15px;" type="submit">Post</button>
+                <button class="btn btn-outline-secondary" style="margin-top: 15px;" type="submit">Post</button>
             </div>
         </form>
     </div>
-{% endblock content %}
+{% endblock body %}

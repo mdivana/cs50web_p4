@@ -64,11 +64,22 @@ def register(request):
         return render(request, "network/register.html")
 
 
+# Added class-based views to see feed
+# Might have to make function-based since class-based views won't update data without refresh
 class PostListView(ListView):
     model = Post
-    template_name = 'network/index.html'
     context_object_name = 'posts'
     ordering = ['-date_posted']
+
+
+class UserPostListView(LoginRequiredMixin, ListView):
+    model = Post
+    template_name = 'network/post_list.html'
+    context_object_name = 'posts'
+    ordering = ['-date_posted']
+    
+    def get_queryset(self):
+        return super().get_queryset().filter(author=self.request.user)
 
 
 class PostDetailView(DetailView):
