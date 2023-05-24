@@ -1,4 +1,5 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block title %}
     Post Details
@@ -9,26 +10,22 @@
         <div class="article-metadata" style="border-bottom: none;">
             <small class="text-muted">{{ post.date_posted|date:"d F, Y" }}</small>
             <h4 class="mr-2 author_title">Post by: {{ post.author }}</h4>
-            {% if object.author == user %}
-                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' object.id %}">Update</a>
-                <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' object.id %}">Delete</a>
+            <h2 class="article-title">{{ post.title }}</h2>
+            {% if post.author == user %}
+            <form>
+                {% csrf_token %}
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <button class="btn btn-primary btn-sm mt-1 mb-1" id="edit" onclick="editPost('{{ post.id }}')" class="text-primary" type="button">Edit</button>
+                <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' post.id %}">Delete</a>
+            </form>        
             {% endif %}
             <div>
-                <h2 class="article-title">{{ post.title }}</h2>
-                <p class="article-content">{{ post.content }}</p>
-                <p>Likes: {{ post.likecount }}</p>
-                {% if user in post.likes.all %}
-                    <form method="POST" action="{% url 'unlike-post' post.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Unlike</button>
-                    </form>
-                {% else %}
-                    <form method="POST" action="{% url 'like-post' post.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary">Like</button>
-                    </form>
-                {% endif %}
+                <textarea class="form-control mb-2" id="edit-box" style="display:none;">{{ post.content }}</textarea>
+                <p id="content" class="article-content">{{ post.content }}</p>
+                <button id="edit-btn" class="btn btn-primary" style="display:none; margin-bottom: 5px;" type="button">Save</button>
             </div>
+            <button class="btn btn-primary" id="like-btn-{{post.id}}" onclick="like('{{ post.id }}')">Like</button>
+            <div id="like-count-{{post.id}}">{{ post.likes }}</div>
         </div>
     </article>
 {% endblock body %}

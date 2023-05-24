@@ -12,11 +12,7 @@ class Post(models.Model):
     title = models.CharField(max_length=70)
     content = models.TextField()
     date_posted = models.DateTimeField(auto_now_add=True)
-    likes = models.ManyToManyField(
-        User,
-        through='Like',
-        related_name='liked_posts'
-    )
+    likes = models.IntegerField(default=0, blank=True, null=True, editable=False)
 
     def likecount(self):
         return self.likes.count()
@@ -26,8 +22,13 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse('post-detail', kwargs={'pk': self.pk})
-    
+
+
 class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    count = models.IntegerField(default=0)
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="likeduser")
+    post = models.ForeignKey(Post, on_delete=models.PROTECT, related_name="likedpost")
+
+
+class Follow(models.Model):
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following")  # user's followings
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="follower")  # user's followers
