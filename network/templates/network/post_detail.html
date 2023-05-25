@@ -24,8 +24,14 @@
                 <p id="content" class="article-content">{{ post.content }}</p>
                 <button id="edit-btn" class="btn btn-primary" style="display:none; margin-bottom: 5px;" type="button">Save</button>
             </div>
-            <button class="btn btn-primary" id="like-btn-{{post.id}}" onclick="like('{{ post.id }}')">Like</button>
-            <div id="like-count-{{post.id}}">{{ post.likes }}</div>
+            <div>
+                {% if liked_by_user %}
+                    <button class="btn btn-primary" id="like-btn-{{ post.id }}" onclick="like('{{post.id}}')">Unlike</button>
+                {% else %}
+                    <button class="btn btn-primary" id="like-btn-{{ post.id }}" onclick="like('{{post.id}}')">Like</button>
+                {% endif %}
+                <div id="like-count-{{ post.id }}" class="d-inline-block">Likes: {{ post.likes }}</div>
+            </div>
         </div>
     </article>
 {% endblock body %}

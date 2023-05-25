@@ -40,3 +40,41 @@ function editPost(id) {
         });
     }); 
 }
+
+    function like(id) {
+        var like_btn = document.querySelector(`#like-btn-${id}`);
+        var like_count = document.querySelector(`#like-count-${id}`);
+        
+        if (like_btn.textContent === 'Like') {
+            fetch('/like/' + id, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    likes: 1,
+                })
+            })
+            .then(() => {
+                like_btn.textContent = 'Unlike';
+                return fetch('/like/' + id);
+            })
+            .then((response) => response.json())
+            .then(post => {
+                like_count.innerHTML = "Likes: " + post.likes;
+            });
+        } else {
+            fetch('/like/' + id, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    likes: 0,
+                })
+            })
+            .then(() => {
+                like_btn.textContent = 'Like';
+                return fetch('/like/' + id);
+            })
+            .then((response) => response.json())
+            .then(post => {
+                like_count.innerHTML = "Likes: " + post.likes;
+            });
+        }
+        return false;
+    }

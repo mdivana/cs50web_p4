@@ -1,7 +1,7 @@
 from django.urls import path
 
 from . import views
-from .views import PostCreateView, PostUpdateView, PostDeleteView
+from .views import PostCreateView, PostDeleteView
 
 
 urlpatterns = [
@@ -17,4 +17,5 @@ urlpatterns = [
 
     # API Routes
     path("edit/<int:post_id>/", views.edit, name="edit"),
+    path("like/<int:post_id>", views.like, name="like"),
 ]

@@ -73,6 +73,12 @@ def register(request):
 # Might have to make function-based since class-based views won't update data without refresh
 def post_list(request):
     posts = Post.objects.order_by('-date_posted')
+    for post in posts:
+        post.likes = Like.objects.filter(post=post.id).count()
+        post.save()
+    paginator = Paginator(posts, 10)
+    page = request.GET.get('page')
+    posts = paginator.get_page(page)
     context = {
         'posts': posts,
     }
@@ -82,17 +88,29 @@ def post_list(request):
 @login_required
 def profile(request, username):
     posts = Post.objects.filter(author__username=username).order_by('-date_posted')
+    for post in posts:
+        post.likes = Like.objects.filter(post=post.id).count()
+        post.save()
+    paginator = Paginator(posts, 10)
+    page = request.GET.get('page')
+    posts = paginator.get_page(page)
     context = {
         'posts': posts,
     }
     return render(request, 'network/post_list.html', context)
 
 
+
 def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
-
+    post.likes = Like.objects.filter(post=post.id).count()
+    post.save()
+    post = get_object_or_404(Post, pk=post.id)
+    likes = Like.objects.filter(post=post)
+    liked_by_user = request.user.id in likes.values_list('user__id', flat=True)
     context = {
         'post': post,
+        'liked_by_user': liked_by_user,
     }
     return render(request, 'network/post_detail.html', context)
 
@@ -129,3 +147,24 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             return True
         return False
 
+
+@csrf_exempt
+@login_required
+def like(request, post_id):
+    post = Post.objects.get(id=post_id)
+
+    if request.method == "GET":
+        return JsonResponse(post.serialize())
+
+    if request.method == "PUT":
+        data = json.loads(request.body)
+        print(data)
+        print(data.get("likes"))
+        if data.get("likes"):
+            Like.objects.create(user=request.user, post=post)
+            post.likes = Like.objects.filter(post=post).count()
+        else:  # unlike
+            Like.objects.filter(user=request.user, post=post).delete()
+            post.likes = Like.objects.filter(post=post).count()
+        post.save()
+        return HttpResponse(status=204)

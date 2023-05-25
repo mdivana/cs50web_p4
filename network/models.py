@@ -14,8 +14,11 @@ class Post(models.Model):
     date_posted = models.DateTimeField(auto_now_add=True)
     likes = models.IntegerField(default=0, blank=True, null=True, editable=False)
 
-    def likecount(self):
-        return self.likes.count()
+    def serialize(self):
+        return {
+            "id": self.id,
+            "likes": self.likes
+        }
     
     def __str__(self):
         return self.title
