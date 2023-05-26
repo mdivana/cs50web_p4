@@ -1,7 +1,7 @@
 import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import CreateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -69,8 +69,7 @@ def register(request):
         return render(request, "network/register.html")
 
 
-# Added class-based views to see feed
-# Might have to make function-based since class-based views won't update data without refresh
+# Added function-based view to see feed
 def post_list(request):
     posts = Post.objects.order_by('-date_posted')
     for post in posts:
@@ -85,6 +84,8 @@ def post_list(request):
     return render(request, 'network/post_list.html', context)
 
 
+# Added function-based view for profile
+# Have to add following/follower count 
 @login_required
 def profile(request, username):
     posts = Post.objects.filter(author__username=username).order_by('-date_posted')
@@ -100,7 +101,7 @@ def profile(request, username):
     return render(request, 'network/post_list.html', context)
 
 
-
+# Added function-based view for detailed version of post
 def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.likes = Like.objects.filter(post=post.id).count()
@@ -113,7 +114,31 @@ def post_detail(request, pk):
         'liked_by_user': liked_by_user,
     }
     return render(request, 'network/post_detail.html', context)
+    
 
+# Added post creation by class-based view
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Post
+    fields = ['title', 'content']
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+
+# Added post deletion by class-based view
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Post
+    success_url = '/'
+
+    def test_func(self):
+        post = self.get_object()
+        if self.request.user == post.author:
+            return True
+        return False
+
+
+# Added function for API route to handle edit user-side
 @csrf_exempt
 @login_required
 def edit(request, post_id):
@@ -127,27 +152,7 @@ def edit(request, post_id):
         return HttpResponse(status=204)
     
 
-class PostCreateView(LoginRequiredMixin, CreateView):
-    model = Post
-    fields = ['title', 'content']
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
-
-
-
-class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    model = Post
-    success_url = '/'
-
-    def test_func(self):
-        post = self.get_object()
-        if self.request.user == post.author:
-            return True
-        return False
-
-
+# Added function for API route to handle like functionality user-side
 @csrf_exempt
 @login_required
 def like(request, post_id):
