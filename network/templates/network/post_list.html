@@ -1,12 +1,17 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
+    {% if profile_username is not None %}
+        <h1>{{ profile_username }}'s Profile</h1>
+        <p>Followers: {{ follower_count }}</p>
+        <p>Following: {{ following_count }}</p>
+    {% endif %}
     {% for post in posts %}
         <article class="media content-section" style="background-color: lightgray; border-radius: 20px; padding: 10px; margin: 10px;">
                 <div class="article-metadata" style="border-bottom: none;">
                     <small class="text-muted">{{ post.date_posted|date:"d F, Y" }}</small>
                     <div>
-                        <h4 class="mr-2 author_title">Post by: {{ post.author }}</h4>
+                        <h4 class="mr-2 author_title">Post by: <a href="{% url 'profile' post.author %}">{{ post.author }}</a></h4>
                         <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
                         <p class="article-content">{{ post.content }}</p>
                         <p>Likes: {{ post.likes }}</p>

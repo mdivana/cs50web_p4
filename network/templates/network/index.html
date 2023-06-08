@@ -6,7 +6,7 @@
                 <div class="article-metadata" style="border-bottom: none;">
                     <small class="text-muted">{{ post.date_posted|date:"d F, Y" }}</small>
                     <div>
-                        <h4 class="mr-2 author_title">Post by: {{ post.author }}</h4>
+                        <h4 class="mr-2 author_title">Post by: <a href="{% url 'profile' post.author %}">{{ post.author }}</a></h4>
                         <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
                         <p class="article-content">{{ post.content }}</p>
                     </div>

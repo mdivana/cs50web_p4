@@ -85,10 +85,11 @@ def post_list(request):
 
 
 # Added function-based view for profile
-# Have to add following/follower count 
-@login_required
+# Have to add following/follower count
 def profile(request, username):
     posts = Post.objects.filter(author__username=username).order_by('-date_posted')
+    follower_count = Follow.objects.filter(following__username=username).count()
+    following_count = Follow.objects.filter(follower__username=username).count()
     for post in posts:
         post.likes = Like.objects.filter(post=post.id).count()
         post.save()
@@ -97,6 +98,9 @@ def profile(request, username):
     posts = paginator.get_page(page)
     context = {
         'posts': posts,
+        'follower_count': follower_count,
+        'following_count': following_count,
+        'profile_username': username,
     }
     return render(request, 'network/post_list.html', context)
 
