@@ -5,6 +5,19 @@
         <h1>{{ profile_username }}'s Profile</h1>
         <p>Followers: {{ follower_count }}</p>
         <p>Following: {{ following_count }}</p>
+        {% if request.user.is_authenticated and request.user.username != profile_username %}
+            {% if is_following %}
+                <form action="{% url 'unfollow' profile_username %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Unfollow</button>
+                </form>
+            {% else %}
+                <form action="{% url 'follow' profile_username %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Follow</button>
+                </form>
+            {% endif %}
+        {% endif %}
     {% endif %}
     {% for post in posts %}
         <article class="media content-section" style="background-color: lightgray; border-radius: 20px; padding: 10px; margin: 10px;">

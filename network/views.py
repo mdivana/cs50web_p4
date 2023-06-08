@@ -90,6 +90,7 @@ def profile(request, username):
     posts = Post.objects.filter(author__username=username).order_by('-date_posted')
     follower_count = Follow.objects.filter(following__username=username).count()
     following_count = Follow.objects.filter(follower__username=username).count()
+    is_following = Follow.objects.filter(following__username=username, follower=request.user).exists()
     for post in posts:
         post.likes = Like.objects.filter(post=post.id).count()
         post.save()
@@ -101,8 +102,26 @@ def profile(request, username):
         'follower_count': follower_count,
         'following_count': following_count,
         'profile_username': username,
+        'is_following': is_following,
     }
     return render(request, 'network/post_list.html', context)
+
+
+@login_required
+def follow(request, username):
+    following_user = request.user
+    following = User.objects.get(username=username)
+    follow_object = Follow.objects.create(following=following, follower=following_user)
+    # Additional logic or actions if needed
+    return redirect('profile', username=username)
+
+@login_required
+def unfollow(request, username):
+    following_user = request.user
+    following = User.objects.get(username=username)
+    Follow.objects.filter(following=following, follower=following_user).delete()
+    # Additional logic or actions if needed
+    return redirect('profile', username=username)
 
 
 # Added function-based view for detailed version of post

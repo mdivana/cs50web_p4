@@ -14,6 +14,8 @@ urlpatterns = [
     path('post/<int:pk>/', views.post_detail, name='post-detail'),
     path('post/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),
     path('post/new/', PostCreateView.as_view(), name='post-create'),
+    path('follow/<str:username>/', views.follow, name='follow'),
+    path('unfollow/<str:username>/', views.unfollow, name='unfollow'),
 
     # API Routes
     path("edit/<int:post_id>/", views.edit, name="edit"),

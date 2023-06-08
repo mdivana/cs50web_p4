@@ -6,6 +6,7 @@ from django.urls import reverse
 class User(AbstractUser):
     pass
 
+
 class Post(models.Model):
     id = models.BigAutoField(primary_key=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
