@@ -70,17 +70,27 @@ def register(request):
 
 
 # Added function-based view to see feed
-def post_list(request):
-    posts = Post.objects.order_by('-date_posted')
+def post_list(request, username=None):
+    if username is not None:
+        user = User.objects.get(username=username)
+        following = Follow.objects.filter(follower=user).values('following')
+        following_list = User.objects.filter(id__in=following)
+        posts = Post.objects.filter(author__in=following_list).order_by('-date_posted')
+    else:
+        posts = Post.objects.order_by('-date_posted')
+
     for post in posts:
         post.likes = Like.objects.filter(post=post.id).count()
         post.save()
+
     paginator = Paginator(posts, 10)
     page = request.GET.get('page')
     posts = paginator.get_page(page)
+
     context = {
         'posts': posts,
     }
+
     return render(request, 'network/post_list.html', context)
 
 
@@ -90,7 +100,9 @@ def profile(request, username):
     posts = Post.objects.filter(author__username=username).order_by('-date_posted')
     follower_count = Follow.objects.filter(following__username=username).count()
     following_count = Follow.objects.filter(follower__username=username).count()
-    is_following = Follow.objects.filter(following__username=username, follower=request.user).exists()
+    is_following = None
+    if request.user is not None:
+        is_following = Follow.objects.filter(following__username=username, follower=request.user).exists()
     for post in posts:
         post.likes = Like.objects.filter(post=post.id).count()
         post.save()
@@ -186,8 +198,6 @@ def like(request, post_id):
 
     if request.method == "PUT":
         data = json.loads(request.body)
-        print(data)
-        print(data.get("likes"))
         if data.get("likes"):
             Like.objects.create(user=request.user, post=post)
             post.likes = Like.objects.filter(post=post).count()

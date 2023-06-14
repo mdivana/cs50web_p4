@@ -10,6 +10,7 @@ urlpatterns = [
     path("logout", views.logout_view, name="logout"),
     path("register", views.register, name="register"),
     path('posts', views.post_list, name='post-list'),
+    path('followings/posts/<str:username>', views.post_list, name='post-list-following'),
     path('user/<str:username>/', views.profile, name='profile'),
     path('post/<int:pk>/', views.post_detail, name='post-detail'),
     path('post/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),
